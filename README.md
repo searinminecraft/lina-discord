@@ -4,23 +4,24 @@ This is lina rewritten to work on Discord. It has the same functions as the Revo
 # Features
 
 ## General
-[x] Player tracking
-[x] STK Seen
-[x] Top 10 ranked players
-[x] Player searching
-[ ] Friends list (partial)
-[x] Server list
-[ ] PokeMap
-[ ] Addon querying
-[ ] Ranking info of a player
+- [x] Player tracking
+- [x] STK Seen
+- [x] Top 10 ranked players
+- [x] Player searching
+- [ ] Friends list (partial)
+- [x] Server list
+- [ ] PokeMap
+- [ ] Addon querying
+- [ ] Ranking info of a player
 ## Internal
-[x] Authentication
-[ ] Polling
-[ ] Session revalidation
+- [x] Authentication
+- [ ] Polling
+- [ ] Session revalidation
 
 # How to set up
 
-> This assumes you have knowledge on how to create a Discord bot and set up the proper intents, as well as how to use the Linux command line, and how to create a PostgreSQL database
+> This assumes you have knowledge on how to create a Discord bot and set up the proper intents and invite it, as well as how to use the Linux command line, and how to create a PostgreSQL database.
+> 
 > Only Linux is supported. Other platforms will not be supported.
 
 1. Initial set up
@@ -74,4 +75,7 @@ python launch.py
 
 # License
 This bot is licensed under the GNU Affero General Public License, version 3.
+
 Certain portions of the source code are from Rapptz's RoboDanny bot, licensed under the Mozilla Public License, version 2.
+
+Made with :heart: by searingmoonlight
