@@ -21,32 +21,50 @@ class PlayerTrack(commands.Cog):
         self.serverlist = None
         self.onlinePlayers = {}
 
-    async def ptrackNotifyJoin(self, user: int, username: str, country: str, server: str, serverCountry: str):
+    async def ptrackNotifyJoin(self, user: int, userdata: dict, serverdata: dict):
         user = self.bot.get_user(user)
         assert user is not None
 
         await user.send(embed=discord.Embed(
             title=f"STK Player Tracker",
             description=(
-                f"{flagconverter(country)} {username} joined a server.\n" \
-                f"Server: {flagconverter(serverCountry)} {server}"
+                "{country} {username} joined a server.\n" \
+                "Server: {serverCountry} {server}"
+            ).format(
+                country=flagconverter(userdata["country-code"]),
+                username=userdata["username"],
+                serverCountry=flagconverter(serverdata["country_code"]),
+                server=str(serverdata["name"]) \
+                    .replace("\r","") \
+                    .replace("\n", "")
             ),
             color=self.bot.accent_color
+        ).set_thumbnail(
+            url="https://raw.githubusercontent.com/supertuxkart/stk-code/master/data/supertuxkart_256.png"
         ))
     
-    async def ptrackNotifyLeft(self, user: int, username: str, country: str, server: str, serverCountry: str):
+    async def ptrackNotifyLeft(self, user: int, userdata: dict, serverdata: dict):
         user = self.bot.get_user(user)
         assert user is not None
 
         await user.send(embed=discord.Embed(
             title=f"STK Player Tracker",
             description=(
-                f"{flagconverter(country)} {username} left.\n" \
-                f"Server: {flagconverter(serverCountry)} {server}"
+                "{country} {username} left.\n" \
+                "Server: {serverCountry} {server}"
+            ).format(
+                country=flagconverter(userdata["country-code"]),
+                username=userdata["username"],
+                serverCountry=flagconverter(serverdata["country_code"]),
+                server=str(serverdata["name"]) \
+                    .replace("\r","") \
+                    .replace("\n", "")
             ),
             color=self.bot.accent_color
+        ).set_thumbnail(
+            url="https://raw.githubusercontent.com/supertuxkart/stk-code/master/data/supertuxkart_256.png"
         ))
-
+        
 
     async def triggerDiff(self, tree: et.Element):
 
@@ -223,14 +241,12 @@ class PlayerTrack(commands.Cog):
                         ))
 
                     async with self.bot.pool.acquire() as con:
-                        for i in await con.fetch("SELECT * FROM lina_discord_ptrack;"):
-                            if username in i["usernames"]:
+                        for e in await con.fetch("SELECT * FROM lina_discord_ptrack;"):
+                            if username in e["usernames"]:
                                 self.bot.loop.create_task(self.ptrackNotifyJoin(
-                                    i["id"],
-                                    username,
-                                    userCountryCode,
-                                    serverName,
-                                    serverCountry
+                                    e["id"],
+                                    serverPlayers[i].attrib,
+                                    serverInfo.attrib
                                 ))
 
 
@@ -260,14 +276,12 @@ class PlayerTrack(commands.Cog):
                         ))
 
                     async with self.bot.pool.acquire() as con:
-                        for i in await con.fetch("SELECT * FROM lina_discord_ptrack;"):
-                            if username in i["usernames"]:
+                        for e in await con.fetch("SELECT * FROM lina_discord_ptrack;"):
+                            if username in e["usernames"]:
                                 self.bot.loop.create_task(self.ptrackNotifyLeft(
-                                    i["id"],
-                                    username,
-                                    userCountryCode,
-                                    serverName,
-                                    serverCountry
+                                    e["id"],
+                                    oldServerPlayers[i].attrib,
+                                    oldServerInfo.attrib
                                 ))
 
 
@@ -333,7 +347,7 @@ server_name = $3, server_country = lower($4);
 
         try: 
             data = await self.bot.pool.fetchrow("""SELECT username, LOWER(country) AS country,
-                                            date, server_name, LOWER(server_country) AS server_country FROM stk_seen
+                                            date, server_name, LOWER(server_country) AS server_country FROM lina_discord_stk_seen
                                             WHERE username ILIKE $1 GROUP BY username FETCH FIRST 1 ROW ONLY""",
                                             player.translate(sql_esc) + "%")
         except Exception:

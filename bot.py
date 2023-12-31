@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import discord
 from discord.ext import tasks, commands
 
@@ -6,12 +8,16 @@ import xml.etree.ElementTree as et
 from aiohttp import ClientSession
 import asyncio
 import asyncpg
+from typing import TYPE_CHECKING, Optional
 from utils import bigip, flagconverter
 
 import constants
 
 log = logging.getLogger("lina.main")
-log_ptrack = logging.getLogger("lina.ptrack.triggerDiff")
+
+if TYPE_CHECKING:
+    from cogs import PlayerTrack
+    from cogs import Online
 
 extensions = (
     "cogs.online",
@@ -45,11 +51,6 @@ class Lina(commands.Bot):
                          command_prefix=constants.PREFIX)
 
         self.accent_color = constants.ACCENT_COLOR
-        self.addons_dict = {}
-        self.serverlist: et.Element = None
-        self.lastserverlist: et.Element = None
-        self.onlinePlayers = {}
-    
     
     async def stkPostReq(self, target, args):
         """Helper function to send a POST request to STK servers."""
@@ -128,8 +129,14 @@ class Lina(commands.Bot):
         await super().start(constants.TOKEN, reconnect=True)
 
     @property
-    def playertrack(self):
+    def playertrack(self) -> Optional[PlayerTrack]:
+        """Represents the PlayerTrack cog"""
         return self.get_cog("PlayerTrack")
+
+    @property
+    def online(self) -> Optional[Online]:
+        """Represents the Online cog"""
+        return self.get_cog("Online")
 
     async def on_ready(self):
         log.info(f"Bot {self.user} ({self.user.id}) is ready!")
