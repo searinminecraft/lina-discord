@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import discord
 from discord.ext import commands, tasks
 from discord import app_commands
@@ -5,12 +7,15 @@ import logging
 import datetime
 import time
 import xml.etree.ElementTree as et
+from typing import TYPE_CHECKING
 
-from bot import Lina
 import constants
 from utils import flagconverter
 from utils import formatting
 from utils import bigip
+
+if TYPE_CHECKING:
+    from bot import Lina
 
 log = logging.getLogger("lina.cogs.playertrack")
 

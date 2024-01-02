@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 import datetime
-
-from bot import Lina
+from typing import TYPE_CHECKING
 from utils.formatting import humanize_timedelta
+
+if TYPE_CHECKING:
+    from bot import Lina
 
 class Misc(commands.Cog):
     def __init__(self, bot: Lina):
@@ -38,6 +42,41 @@ class Misc(commands.Cog):
             ),
             color=self.bot.accent_color
         ), mention_author=False)
+
+    @commands.hybrid_command(description="Source code")
+    async def source(self, ctx: commands.Context):
+        return await ctx.send("https://github.com/searinminecraft/lina-discord")
+
+    @commands.hybrid_command(description="About linaSTK")
+    async def about(self, ctx: commands.Context):
+        return await ctx.reply(embed=discord.Embed(
+            title="About linaSTK",
+            description=(
+                "linaSTK is a free as in freedom and open source " \
+                "Discord bot that provides SuperTuxKart related " \
+                "utilities and commands.\n\n" \
+                "# License\n" \
+                "Copyright (c) 2023-2024 searingmoonlight\n\n" \
+
+                "This program is free software: you can redistribute it and/or modify " \
+                "it under the terms of the GNU Affero General Public License as published by " \
+                "the Free Software Foundation, either version 3 of the License, or " \
+                "(at your option) any later version.\n\n"
+
+                "This program is distributed in the hope that it will be useful, "
+                "but WITHOUT ANY WARRANTY; without even the implied warranty of " \
+                "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the " \
+                "GNU Affero General Public License for more details.\n\n" \
+
+                "You should have received a copy of the GNU Affero General Public License " \
+                "along with this program.  If not, see <https://www.gnu.org/licenses/>."
+            ),
+            color=self.bot.accent_color
+        ) \
+            .set_thumbnail(url=self.bot.user.display_avatar.url)
+            .set_footer(
+                icon_url="https://github.com/searinminecraft.png",
+                text="Made with love by searingmoonlight"))
 
 async def setup(bot: Lina):
     await bot.add_cog(Misc(bot))

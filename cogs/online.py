@@ -1,13 +1,18 @@
+from __future__ import annotations
+
 import discord
 from discord import app_commands, ui
 from discord.ext import commands, menus, tasks
 import logging
 import xml.etree.ElementTree as et
-
-from bot import Lina
+from typing import TYPE_CHECKING
 from utils import bigip, flagconverter
 
+if TYPE_CHECKING:
+    from bot import Lina
+
 log = logging.getLogger("lina.cogs.online")
+
 
 class EmbedPageSource(menus.ListPageSource):
 

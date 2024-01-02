@@ -1,5 +1,5 @@
 # linaSTK Discord Edition
-This is lina rewritten to work on Discord. It has the same functions as the Revolt version but it's still work in progress and is incomplete. It is intended for this to be used on one server, for example the SuperTuxKart Discord.
+This is lina rewritten to work on Discord. It has the same functions as the Revolt version but it's still work in progress and is incomplete. It is currently used for the SuperTuxKart Discord, but you can self host it yourself.
 
 # Features
 
@@ -15,8 +15,8 @@ This is lina rewritten to work on Discord. It has the same functions as the Revo
 - [ ] Ranking info of a player
 ## Internal
 - [x] Authentication
-- [ ] Polling
-- [ ] Session revalidation
+- [x] Polling
+- [x] Session revalidation
 
 # How to set up
 
