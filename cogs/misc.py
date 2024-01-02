@@ -6,6 +6,7 @@ from discord.ext import commands
 import datetime
 from typing import TYPE_CHECKING
 from utils.formatting import humanize_timedelta
+import time
 
 if TYPE_CHECKING:
     from bot import Lina
@@ -77,6 +78,22 @@ class Misc(commands.Cog):
             .set_footer(
                 icon_url="https://github.com/searinminecraft.png",
                 text="Made with love by searingmoonlight"))
+
+    @commands.command()
+    async def ping(self, ctx: commands.Context):
+    
+        start = time.perf_counter()
+        message = await ctx.reply("Pong!", mention_author=False)
+        end = time.perf_counter()
+
+        messageDuration = round((end - start) * 1000)
+        heartbeat = round(self.bot.latency * 1000)
+
+        return await message.edit(
+            content="Pong! Message: {msg_dur}ms, Heartbeat: {heartbeat_dur}ms".format(
+                msg_dur=messageDuration,
+                heartbeat_dur=heartbeat
+            ))
 
 async def setup(bot: Lina):
     await bot.add_cog(Misc(bot))

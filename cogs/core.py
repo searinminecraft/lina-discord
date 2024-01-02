@@ -67,9 +67,10 @@ class Core(commands.Cog):
         commands = await self.bot.tree.sync()
         await ctx.reply(f"Successfully synced {len(commands)} commands.")
 
-
-
-
+    @commands.command(hidden=True)
+    async def shutdown(self, ctx: commands.Context):
+        await ctx.reply("Shutting down :wave:")
+        await self.bot.close()
 
 async def setup(bot: Lina):
     await bot.add_cog(Core(bot))

@@ -197,6 +197,7 @@ class Lina(commands.Bot):
 
     async def start(self):
         """Bring lina to life"""
+        log.info("Starting bot...")
         await super().start(constants.TOKEN, reconnect=True)
 
     @property
