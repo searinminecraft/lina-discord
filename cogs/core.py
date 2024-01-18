@@ -19,6 +19,7 @@ class Core(commands.Cog):
     @commands.command(hidden=True)
     async def load(self, ctx: commands.Context, *, mod: str):
         try:
+            await ctx.channel.typing()
             await self.bot.load_extension(mod)
         except commands.ExtensionError as e:
             await ctx.reply(f"{e.__class__.__name__}: {e}")
@@ -29,6 +30,7 @@ class Core(commands.Cog):
     @commands.command(hidden=True)
     async def unload(self, ctx: commands.Context, *, mod: str):
         try:
+            await ctx.channel.typing()
             await self.bot.unload_extension(mod)
         except commands.ExtensionError as e:
             await ctx.reply(f"{e.__class__.__name__}: {e}")
@@ -38,6 +40,7 @@ class Core(commands.Cog):
     @commands.command(hidden=True)
     async def reload(self, ctx: commands.Context, *, mod: str):
         try:
+            await ctx.channel.typing()
             await self.bot.reload_extension(mod)
         except commands.ExtensionError as e:
             await ctx.reply(f"{e.__class__.__name__}: {e}")
@@ -52,8 +55,10 @@ class Core(commands.Cog):
         if guild_id:
             guild = discord.Object(guild_id)
         else:
-            guild = ctx.guild
+            guild = ctx.guild_id
 
+
+        await ctx.channel.typing()
         if copy:
             self.bot.tree.copy_global_to(guild=guild)
 

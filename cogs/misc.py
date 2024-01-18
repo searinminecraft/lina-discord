@@ -93,7 +93,7 @@ class Misc(commands.Cog):
             content="Pong! Message: {msg_dur}ms, Heartbeat: {heartbeat_dur}ms".format(
                 msg_dur=messageDuration,
                 heartbeat_dur=heartbeat
-            ))
+            ), )
 
 async def setup(bot: Lina):
     await bot.add_cog(Misc(bot))

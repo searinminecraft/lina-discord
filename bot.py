@@ -191,10 +191,16 @@ class Lina(commands.Bot):
         """Shut down lina"""
 
         log.info("lina is shutting down...")
-        await super().close()
         if hasattr(self, 'session'):
-            await self.session.close()
+            try:
+                await self.stkPostReq("/api/v2/user/client-quit",
+                                f"userid={self.stk_userid}&" \
+                                f"token={self.stk_token}")
+            finally:
+                await self.session.close()
 
+        await super().close()
+        
     async def start(self):
         """Bring lina to life"""
         log.info("Starting bot...")

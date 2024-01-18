@@ -95,7 +95,7 @@ async def runBot():
         pool = await createPool()
         await initDatabase(pool)
     except Exception:
-        log.exception("Could not set up PostgreSQL pool. Will now exit.")
+        log.exception("Could not set up PostgreSQL. Will now exit.")
         return
 
     async with Lina() as lina:

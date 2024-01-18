@@ -331,9 +331,13 @@ server_name = $3, server_country = lower($4);
     async def fetcherWrapper(self):
         try:    
             self.serverlist = await self.bot.stkGetReq("/api/v2/server/get-all")
-            await self.triggerDiff(self.serverlist)
         except Exception:
             log.exception("Failed to get server list.")
+
+        try:
+            await self.triggerDiff(self.serverlist)
+        except Exception:
+            log.exception("Error at triggerDiff")
 
     def cog_load(self):
         self.fetcherWrapper.start()
