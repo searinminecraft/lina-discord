@@ -1,4 +1,6 @@
-lina.log
 __pycache__
 constants.py
 venv
+stkserver
+logs
+config.json

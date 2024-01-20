@@ -6,6 +6,8 @@ import asyncpg
 import contextlib
 import discord
 import logging
+import os
+from third_party.stkwrapper import stkserver_wrapper
 from logging.handlers import RotatingFileHandler
 
 class RemoveNoise(logging.Filter):
@@ -100,6 +102,16 @@ async def runBot():
 
     async with Lina() as lina:
         lina.pool = pool
+        lina.stkserver = stkserver_wrapper.STKServer(
+                logger=log,
+                cwd=os.getcwd() + "/stkserver",
+                autostart=False,
+                extra_args="--disable-addon-karts --disable-addon-tracks",
+                data_path="/usr/share/supertuxkart",
+                executable_path="/usr/bin/supertuxkart",
+                name="linaSTK Verification Server",
+                cfgpath=os.getcwd() + "/stkserver/config.xml"
+        )
         await lina.start()
 
 if __name__ == "__main__":

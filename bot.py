@@ -19,6 +19,7 @@ log = logging.getLogger("lina.main")
 if TYPE_CHECKING:
     from cogs import PlayerTrack
     from cogs import Online
+    from third_party.stkwrapper.stkserver_wrapper import STKServer
 
 extensions = (
     "cogs.online",
@@ -38,7 +39,7 @@ class Lina(commands.Bot):
 
     pool: asyncpg.Pool
 
-    def __init__(self):
+    def __init__(self, stkserver):
 
         intents = discord.Intents.default()
         intents.message_content = True
@@ -52,6 +53,7 @@ class Lina(commands.Bot):
                          command_prefix=constants.PREFIX)
 
         self.accent_color = constants.ACCENT_COLOR
+        self.stkserver: STKServer = stkserver
         self.stk_userid: int = None
         self.stk_token: str = None
     
