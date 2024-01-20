@@ -38,8 +38,9 @@ class Lina(commands.Bot):
     """
 
     pool: asyncpg.Pool
+    stkserver: STKServer
 
-    def __init__(self, stkserver):
+    def __init__(self):
 
         intents = discord.Intents.default()
         intents.message_content = True
@@ -53,7 +54,6 @@ class Lina(commands.Bot):
                          command_prefix=constants.PREFIX)
 
         self.accent_color = constants.ACCENT_COLOR
-        self.stkserver: STKServer = stkserver
         self.stk_userid: int = None
         self.stk_token: str = None
     
@@ -201,7 +201,10 @@ class Lina(commands.Bot):
             finally:
                 await self.session.close()
 
-        await super().close()
+        try:
+            await self.stkserver.stop()
+        finally:
+            await super().close()
         
     async def start(self):
         """Bring lina to life"""
@@ -221,3 +224,6 @@ class Lina(commands.Bot):
     async def on_ready(self):
         log.info(f"Bot {self.user} ({self.user.id}) is ready!")
         self.stkPoll.start()
+        log.info("Starting verification server.")
+        await self.stkserver.launch()
+        

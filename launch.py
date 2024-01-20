@@ -106,11 +106,13 @@ async def runBot():
                 logger=log,
                 cwd=os.getcwd() + "/stkserver",
                 autostart=False,
-                extra_args="--disable-addon-karts --disable-addon-tracks",
-                data_path="/usr/share/supertuxkart",
+                extra_args=("--disable-addon-karts","--disable-addon-tracks"),
+                datapath="/usr/share/supertuxkart",
                 executable_path="/usr/bin/supertuxkart",
                 name="linaSTK Verification Server",
-                cfgpath=os.getcwd() + "/stkserver/config.xml"
+                cfgpath=os.getcwd() + "/stkserver/config.xml",
+                writeln=lambda _: None,
+                extra_env={"XDG_DATA_DIRS": ""}
         )
         await lina.start()
 

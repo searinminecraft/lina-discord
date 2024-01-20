@@ -77,5 +77,17 @@ class Core(commands.Cog):
         await ctx.reply("Shutting down :wave:")
         await self.bot.close()
 
+    @commands.command(hidden=True)
+    async def shutdownverificationserver(self, ctx: commands.Context):
+        self.bot.stkserver.restart = False
+        await ctx.reply("Shutting down verification server.")
+        await self.bot.stkserver.stop()
+
+    @commands.command(hidden=True)
+    async def restartverificationserver(self, ctx: commands.Context):
+        self.bot.stkserver.restart = True
+        await ctx.reply("Restarting verification server.")
+        await self.bot.stkserver.stop()
+
 async def setup(bot: Lina):
     await bot.add_cog(Core(bot))

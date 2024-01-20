@@ -4,3 +4,5 @@ venv
 stkserver
 logs
 config.json
+extensions
+lina.log
