@@ -55,7 +55,7 @@ class Core(commands.Cog):
         if guild_id:
             guild = discord.Object(guild_id)
         else:
-            guild = ctx.guild_id
+            guild = ctx.guild
 
 
         await ctx.channel.typing()

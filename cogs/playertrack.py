@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import discord
 from discord.ext import commands, tasks
-from discord import app_commands
+from discord import app_commands, ui
 import logging
 import datetime
 import time
@@ -18,6 +18,30 @@ if TYPE_CHECKING:
     from bot import Lina
 
 log = logging.getLogger("lina.cogs.playertrack")
+
+class Confirmation(ui.View):
+    def __init__(self, initiator: int):
+        super().__init__(timeout=15)
+        self.value = None
+        self.initiator = initiator
+
+    async def interaction_check(self, interaction: discord.Interaction):
+        if interaction.user and interaction.user.id != self.initiator:
+
+            await interaction.response.send_message("Hey! This interaction isn't owned by you! Now shoo!", ephemeral=True)
+            return False
+        return True
+
+    @ui.button(label="Nevermind", style=discord.ButtonStyle.blurple)
+    async def cancel(self, interaction: discord.Interaction, button: ui.Button):
+        self.value = False
+        self.stop()
+
+    @ui.button(label="Yes!", style=discord.ButtonStyle.red)
+    async def confirm(self, interaction: discord.Interaction, button: ui.Button):
+        self.value = True
+        self.stop()
+        
 
 class PlayerTrack(commands.Cog):
     def __init__(self, bot: Lina):
@@ -549,6 +573,57 @@ server_name = $3, server_country = lower($4);
                     ]),
                     color=self.bot.accent_color
                 ).set_footer(text=f"Total: {len(data['usernames'])}"), ephemeral=True)
+
+
+    @app_commands.command(name="untrackall", description="Untrack ALL users you're currently tracking.")
+    async def untrackall(self, interaction: discord.Interaction):
+
+        view = Confirmation(interaction.user.id)
+        await interaction.response.send_message(embed=discord.Embed(
+            title="Warning!",
+            description=(
+                "You're about to untrack ALL users you're currently tracking.\n"\
+                "This cannot be undone. Continue?"),
+            color=self.bot.accent_color
+        ), view=view)
+
+        await view.wait()
+
+        if view.value == True:
+
+            try:
+                await self.bot.pool.execute(
+                """
+                UPDATE lina_discord_ptrack SET usernames = '{}' WHERE id = $1
+                """, interaction.user.id)
+            except Exception:
+                log.exception(f"Could not clear ptracks for user {interaction.user.id}")
+                return await interaction.edit_original_response(
+                    embed=discord.Embed(
+                        title="Error",
+                        description="A database error occurred. Please contact the developer.",
+                        color=self.bot.accent_color
+                    )
+                )
+            else:
+                return await interaction.edit_original_response(
+                    embed=discord.Embed(
+                        title="Successfully cleared.",
+                        description="Your player track list has been cleared.",
+                        color=self.bot.accent_color
+                    ),
+                    view=None
+                )
+        elif view.value == False:
+            return await interaction.delete_original_response()
+        else:
+            return await interaction.edit_original_response(
+                    embed=discord.Embed(
+                        title="Error",
+                        description="You waited too much...",
+                        color=self.bot.accent_color
+                    ), view=None
+                )
 
 async def setup(bot: Lina):
     await bot.add_cog(PlayerTrack(bot))
