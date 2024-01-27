@@ -1,5 +1,7 @@
 # linaSTK Discord Edition
-This is lina rewritten to work on Discord. It has the same functions as the Revolt version but it's still work in progress and is incomplete. It is currently used for the SuperTuxKart Discord, but you can self host it yourself.
+This is lina rewritten to work on Discord. It has the same functions as the Revolt version but it's still work in progress and is incomplete.
+
+This bot is currently used for the SuperTuxKart Discord, but you can self host it yourself.
 
 # Features
 
@@ -23,6 +25,8 @@ This is lina rewritten to work on Discord. It has the same functions as the Revo
 > This assumes you have knowledge on how to create a Discord bot and set up the proper intents and invite it, as well as how to use the Linux command line, and how to create a PostgreSQL database.
 > 
 > Only Linux is supported. Other platforms will not be supported.
+>
+> But feel free to contact me for help setting up the bot.
 
 1. Initial set up
 ```
@@ -74,8 +78,17 @@ python launch.py
 ```
 
 # License
+
+## Bot
 This bot is licensed under the GNU Affero General Public License, version 3.
 
 Certain portions of the source code are from Rapptz's RoboDanny bot, licensed under the Mozilla Public License, version 2.
 
-Made with :heart: by searingmoonlight
+<img width="150" height="150" alt="lina" style="float: left; margin: 0 10px 0 0" align="left" src="https://autumn.revolt.chat/attachments/lCZSC6d20lfGWADC3IZqN4yTVvOluP8V42eozbV3hU/linastk_.png">
+
+## The Lina character
+Lina is a cute character I came up with during development. All artwork related to her is licensed under the Creative Commons Attribution Share Alike 4.0 International license. You can use her (or maybe even improve her) as long as you comply with the license. *(also treat her with care)*
+
+<br>
+
+#### Made with :heart: by searingmoonlight
