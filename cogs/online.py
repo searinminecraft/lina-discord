@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import discord
+from discord import app_commands
+from discord.ext import commands, tasks
+
 import constants
-from discord import app_commands, ui
-from discord.ext import commands, menus, tasks
 import logging
-import xml.etree.ElementTree as et
 from typing import TYPE_CHECKING, Any
 from utils.formatting import bigip, flagconverter
 from utils.paginator import ButtonPaginator
@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from bot import Lina
 
 log = logging.getLogger("lina.cogs.online")
+
 
 class FriendsListPaginator(ButtonPaginator):
 
@@ -31,6 +32,7 @@ class FriendsListPaginator(ButtonPaginator):
         )
         embed.set_footer(text=f"Page {self.current_page + 1}/{self.max_pages}, Total: {len(self.pages)}")
         return embed
+
 
 class Online(commands.Cog):
 
@@ -101,7 +103,7 @@ class Online(commands.Cog):
                 """
             )
 
-            await pre.executemany(addons) 
+            await pre.executemany(addons)
 
     def convertAddonIdToName(self, _id: str):
 
@@ -173,10 +175,6 @@ class Online(commands.Cog):
     async def online(self, interaction: discord.Interaction):
         serverlist = self.bot.playertrack.serverlist
 
-        result = ""
-
-        fields = []
-
         embed = discord.Embed(
             title = "Public Online",
             color = self.bot.accent_color
@@ -221,7 +219,7 @@ class Online(commands.Cog):
 
     @app_commands.command(name="top-players", description="Get top 10 ranked players.")
     async def topplayers(self, interaction: discord.Interaction):
-        
+
         data = await self.bot.stkPostReq("/api/v2/user/top-players",
                                          f"userid={self.bot.stk_userid}&" \
                                          f"token={self.bot.stk_token}")
@@ -239,11 +237,10 @@ class Online(commands.Cog):
     async def usersearch(self, interaction: discord.Interaction, query: str):
         data = await self.bot.stkPostReq(
             "/api/v2/user/user-search",
-                f"userid={self.bot.stk_userid}&" \
-                f"token={self.bot.stk_token}&" \
-                f"search-string={query}"
-            )
-            
+            f"userid={self.bot.stk_userid}&"
+            f"token={self.bot.stk_token}&"
+            f"search-string={query}"
+        )
 
         if len(data[0]) == 0:
             await interaction.response.send_message(embed=discord.Embed(
@@ -265,9 +262,9 @@ class Online(commands.Cog):
     async def friendslist(self, ctx: commands.Context, userid: int):
         data = await self.bot.stkPostReq(
             "/api/v2/user/get-friends-list",
-                f"userid={self.bot.stk_userid}&" \
-                f"token={self.bot.stk_token}&" \
-                f"visitingid={userid}"
+            f"userid={self.bot.stk_userid}&"
+            f"token={self.bot.stk_token}&"
+            f"visitingid={userid}"
             )
 
         res = []
@@ -280,6 +277,7 @@ class Online(commands.Cog):
 
         page = FriendsListPaginator(userid, res, author_id=ctx.author.id, per_page=25)
         await page.start(ctx)
-        
+
+
 async def setup(bot: Lina):
     await bot.add_cog(Online(bot))

@@ -1,15 +1,14 @@
 from __future__ import annotations
 
 import discord
-from discord import app_commands
 from discord.ext import commands
-import datetime
 from typing import TYPE_CHECKING
 from utils.formatting import humanize_timedelta
 import time
 
 if TYPE_CHECKING:
     from bot import Lina
+
 
 class Misc(commands.Cog):
     def __init__(self, bot: Lina):
@@ -33,12 +32,14 @@ class Misc(commands.Cog):
         await ctx.reply(embed=discord.Embed(
             title="Bot statistics",
             description=(
-                "**Bot started:** {ts}\n" \
-                "**Players in STK Seen database** {stkseen_count}\n" \
+                "**Bot started:** {ts}\n"
+                "**Players in STK Seen database** {stkseen_count}\n"
                 "**Online Players**: {onlinecount}"
             ).format(
                 ts=discord.utils.format_dt(self.bot.uptime),
-                stkseen_count=(await self.bot.pool.fetchrow("SELECT COUNT(*) FROM lina_discord_stk_seen"))["count"],
+                stkseen_count=(
+                    await self.bot.pool.fetchrow("SELECT COUNT(*) FROM lina_discord_stk_seen")
+                )["count"],
                 onlinecount=len(self.bot.playertrack.onlinePlayers)
             ),
             color=self.bot.accent_color
@@ -53,27 +54,27 @@ class Misc(commands.Cog):
         return await ctx.reply(embed=discord.Embed(
             title="About linaSTK",
             description=(
-                "linaSTK is a free as in freedom and open source " \
-                "Discord bot that provides SuperTuxKart related " \
-                "utilities and commands.\n\n" \
-                "# License\n" \
-                "Copyright (c) 2023-2024 searingmoonlight\n\n" \
+                "linaSTK is a free as in freedom and open source "
+                "Discord bot that provides SuperTuxKart related "
+                "utilities and commands.\n\n"
+                "# License\n"
+                "Copyright (c) 2023-2024 searingmoonlight\n\n"
 
-                "This program is free software: you can redistribute it and/or modify " \
-                "it under the terms of the GNU Affero General Public License as published by " \
-                "the Free Software Foundation, either version 3 of the License, or " \
+                "This program is free software: you can redistribute it and/or modify "
+                "it under the terms of the GNU Affero General Public License as published by "
+                "the Free Software Foundation, either version 3 of the License, or "
                 "(at your option) any later version.\n\n"
 
                 "This program is distributed in the hope that it will be useful, "
-                "but WITHOUT ANY WARRANTY; without even the implied warranty of " \
-                "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the " \
-                "GNU Affero General Public License for more details.\n\n" \
+                "but WITHOUT ANY WARRANTY; without even the implied warranty of "
+                "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the "
+                "GNU Affero General Public License for more details.\n\n"
 
-                "You should have received a copy of the GNU Affero General Public License " \
+                "You should have received a copy of the GNU Affero General Public License "
                 "along with this program.  If not, see <https://www.gnu.org/licenses/>."
             ),
             color=self.bot.accent_color
-        ) \
+        )
             .set_thumbnail(url=self.bot.user.display_avatar.url)
             .set_footer(
                 icon_url="https://github.com/searinminecraft.png",
@@ -81,7 +82,7 @@ class Misc(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx: commands.Context):
-    
+
         start = time.perf_counter()
         message = await ctx.reply("Pong!", mention_author=False)
         end = time.perf_counter()
@@ -93,7 +94,8 @@ class Misc(commands.Cog):
             content="Pong! Message: {msg_dur}ms, Heartbeat: {heartbeat_dur}ms".format(
                 msg_dur=messageDuration,
                 heartbeat_dur=heartbeat
-            ), )
+            ))
+
 
 async def setup(bot: Lina):
     await bot.add_cog(Misc(bot))

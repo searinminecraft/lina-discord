@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
 log = logging.getLogger("lina.cogs.playertrack")
 
+
 class Confirmation(ui.View):
     def __init__(self, initiator: int):
         super().__init__(timeout=15)
@@ -39,7 +40,7 @@ class Confirmation(ui.View):
     async def confirm(self, interaction: discord.Interaction, button: ui.Button):
         self.value = True
         self.stop()
-        
+
 
 class PlayerTrack(commands.Cog):
     def __init__(self, bot: Lina):
@@ -61,37 +62,36 @@ class PlayerTrack(commands.Cog):
                 country=flagconverter(userdata["country-code"]),
                 username=userdata["username"],
                 serverCountry=flagconverter(serverdata["country_code"]),
-                server=str(serverdata["name"]) \
-                    .replace("\r","") \
-                    .replace("\n", "")
+                server=str(serverdata["name"])
+                .replace("\r", "")
+                .replace("\n", "")
             ),
             color=self.bot.accent_color
         ).set_thumbnail(
             url="https://raw.githubusercontent.com/supertuxkart/stk-code/master/data/supertuxkart_256.png"
-        ))
-    
+        )) 
+
     async def ptrackNotifyLeft(self, user: int, userdata: dict, serverdata: dict):
         user = self.bot.get_user(user)
         assert user is not None
 
         await user.send(embed=discord.Embed(
-            title=f"STK Player Tracker",
+            title="STK Player Tracker",
             description=(
-                "{country} {username} left.\n" \
+                "{country} {username} left.\n"
                 "Server: {serverCountry} {server}"
             ).format(
                 country=flagconverter(userdata["country-code"]),
                 username=userdata["username"],
                 serverCountry=flagconverter(serverdata["country_code"]),
-                server=str(serverdata["name"]) \
-                    .replace("\r","") \
-                    .replace("\n", "")
+                server=str(serverdata["name"])
+                .replace("\r", "")
+                .replace("\n", "")
             ),
             color=self.bot.accent_color
         ).set_thumbnail(
             url="https://raw.githubusercontent.com/supertuxkart/stk-code/master/data/supertuxkart_256.png"
         ))
-        
 
     async def triggerDiff(self, tree: et.Element):
 

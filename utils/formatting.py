@@ -74,4 +74,3 @@ def humanize_timedelta(
 
     return ", ".join(strings)
 
-
