@@ -7,10 +7,8 @@ from discord.ext import tasks, commands
 import logging
 import xml.etree.ElementTree as et
 from aiohttp import ClientSession
-import asyncio
 import asyncpg
 from typing import TYPE_CHECKING, Optional
-from utils import bigip, flagconverter
 
 import constants
 
@@ -167,7 +165,7 @@ class Lina(commands.Bot):
             ), ephemeral=True)
 
     async def setup_hook(self):
-        self.tree.error(self.on_app_command_error)
+#        self.tree.error(self.on_app_command_error)
 
         if not hasattr(self, "uptime"):
             self.uptime = discord.utils.utcnow()

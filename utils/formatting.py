@@ -1,6 +1,24 @@
 import datetime
 from typing import Optional, SupportsInt
 
+
+def flagconverter(code: str):
+    """Converts the specified country code to a flag."""
+    if code is None:
+        return ''
+
+    if len(code) == 1 or len(code) > 2:
+        raise ValueError("CC too short or long")
+
+    res = f"{''.join(chr(127397 + ord(str.upper(k))) for k in code)}"
+    return res
+
+
+def bigip(x: int):
+    """Converts a BIG formatted IP address to a human-readable format"""
+    return '.'.join([str(y) for y in int.to_bytes(int(x), 4, 'big')])
+
+
 def humanize_timedelta(
     *, timedelta: Optional[datetime.timedelta] = None, seconds: Optional[SupportsInt] = None
 ) -> str:
