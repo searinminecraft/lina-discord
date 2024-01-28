@@ -10,14 +10,13 @@ import xml.etree.ElementTree as et
 from typing import TYPE_CHECKING
 
 import constants
-from utils import flagconverter
-from utils import formatting
-from utils import bigip
+from utils.formatting import bigip, flagconverter, humanize_timedelta
 
 if TYPE_CHECKING:
     from bot import Lina
 
 log = logging.getLogger("lina.cogs.playertrack")
+
 
 class Confirmation(ui.View):
     def __init__(self, initiator: int):
@@ -41,7 +40,7 @@ class Confirmation(ui.View):
     async def confirm(self, interaction: discord.Interaction, button: ui.Button):
         self.value = True
         self.stop()
-        
+
 
 class PlayerTrack(commands.Cog):
     def __init__(self, bot: Lina):
@@ -63,37 +62,36 @@ class PlayerTrack(commands.Cog):
                 country=flagconverter(userdata["country-code"]),
                 username=userdata["username"],
                 serverCountry=flagconverter(serverdata["country_code"]),
-                server=str(serverdata["name"]) \
-                    .replace("\r","") \
-                    .replace("\n", "")
+                server=str(serverdata["name"])
+                .replace("\r", "")
+                .replace("\n", "")
             ),
             color=self.bot.accent_color
         ).set_thumbnail(
             url="https://raw.githubusercontent.com/supertuxkart/stk-code/master/data/supertuxkart_256.png"
-        ))
-    
+        )) 
+
     async def ptrackNotifyLeft(self, user: int, userdata: dict, serverdata: dict):
         user = self.bot.get_user(user)
         assert user is not None
 
         await user.send(embed=discord.Embed(
-            title=f"STK Player Tracker",
+            title="STK Player Tracker",
             description=(
-                "{country} {username} left.\n" \
+                "{country} {username} left.\n"
                 "Server: {serverCountry} {server}"
             ).format(
                 country=flagconverter(userdata["country-code"]),
                 username=userdata["username"],
                 serverCountry=flagconverter(serverdata["country_code"]),
-                server=str(serverdata["name"]) \
-                    .replace("\r","") \
-                    .replace("\n", "")
+                server=str(serverdata["name"])
+                .replace("\r", "")
+                .replace("\n", "")
             ),
             color=self.bot.accent_color
         ).set_thumbnail(
             url="https://raw.githubusercontent.com/supertuxkart/stk-code/master/data/supertuxkart_256.png"
         ))
-        
 
     async def triggerDiff(self, tree: et.Element):
 
@@ -415,7 +413,7 @@ server_name = $3, server_country = lower($4);
                     description="I last saw {flag} {username} online **{time} ago** (since {ts}) in server: {serverflag} {server}".format(
                         flag=flagconverter(data["country"]),
                         username=data["username"],
-                        time=formatting.humanize_timedelta(timedelta=(discord.utils.utcnow() - data["date"].replace(tzinfo=datetime.timezone.utc))),
+                        time=humanize_timedelta(timedelta=(discord.utils.utcnow() - data["date"].replace(tzinfo=datetime.timezone.utc))),
                         ts=discord.utils.format_dt(datetime.datetime.fromtimestamp(data["date"].timestamp() - time.timezone)),
                         serverflag=flagconverter(data["server_country"]),
                         server=str(data["server_name"]).replace("\r","").replace("\n","")

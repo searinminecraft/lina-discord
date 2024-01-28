@@ -7,10 +7,8 @@ from discord.ext import tasks, commands
 import logging
 import xml.etree.ElementTree as et
 from aiohttp import ClientSession
-import asyncio
 import asyncpg
 from typing import TYPE_CHECKING, Optional
-from utils import bigip, flagconverter
 
 import constants
 
@@ -27,9 +25,11 @@ extensions = (
     "cogs.misc"
 )
 
+
 class STKRequestError(Exception):
     """Raised when an error occurs upon performing a request to STK servers."""
     pass
+
 
 class Lina(commands.Bot):
     """
@@ -54,7 +54,7 @@ class Lina(commands.Bot):
         self.accent_color = constants.ACCENT_COLOR
         self.stk_userid: int = None
         self.stk_token: str = None
-    
+
     async def stkPostReq(self, target, args):
         """Helper function to send a POST request to STK servers."""
         assert self.session is not None
@@ -85,15 +85,15 @@ class Lina(commands.Bot):
         async with self.session.get(target) as r:
             r.raise_for_status()
             return et.fromstring(await r.text())
-    
+
     async def authSTK(self):
         """Authenticate to STK"""
         log.info(f"Trying to authenticate STK account {constants.STK_USERNAME}")
         try:
             loginPayload = await self.stkPostReq(
                 "/api/v2/user/connect",
-                f"username={constants.STK_USERNAME}&" \
-                f"password={constants.STK_PASSWORD}&" \
+                f"username={constants.STK_USERNAME}&"
+                f"password={constants.STK_PASSWORD}&"
                 "save-session=true"
             )
         except Exception:
@@ -104,7 +104,7 @@ class Lina(commands.Bot):
             log.critical(f"Unable to login! {loginPayload.attrib['info']}")
             log.critical("The bot will now shut down.")
             return await self.close()
-        
+
         self.stk_userid = loginPayload.attrib["userid"]
         self.stk_token = loginPayload.attrib["token"]
 
@@ -115,7 +115,7 @@ class Lina(commands.Bot):
         try:
             await self.stkPostReq(
                 "/api/v2/user/poll",
-                f"userid={self.stk_userid}&" \
+                f"userid={self.stk_userid}&"
                 f"token={self.stk_token}"
             )
         except STKRequestError as e:
@@ -159,7 +159,7 @@ class Lina(commands.Bot):
                     description=str(original),
                     color=self.accent_color
                 ), ephemeral=True)
-            
+
             return await interaction.response.send_message(embed=discord.Embed(
                 title="Sorry, this shouldn't have happened. Guru Meditation.",
                 description=f"```\n{str(original)}\n```",
@@ -184,7 +184,7 @@ class Lina(commands.Bot):
         for extension in extensions:
             try:
                 await self.load_extension(extension)
-            except Exception as e:
+            except Exception:
                 log.exception(f"Unable to load extension {extension}.")
 
     async def close(self):
@@ -194,13 +194,13 @@ class Lina(commands.Bot):
         if hasattr(self, 'session'):
             try:
                 await self.stkPostReq("/api/v2/user/client-quit",
-                                f"userid={self.stk_userid}&" \
-                                f"token={self.stk_token}")
+                                      f"userid={self.stk_userid}&"
+                                      f"token={self.stk_token}")
             finally:
                 await self.session.close()
 
         await super().close()
-        
+
     async def start(self):
         """Bring lina to life"""
         log.info("Starting bot...")
