@@ -33,12 +33,16 @@ class Misc(commands.Cog):
             title="Bot statistics",
             description=(
                 "**Bot started:** {ts}\n"
-                "**Players in STK Seen database** {stkseen_count}\n"
+                "**Players in STK Seen database**: {stkseen_count}\n"
+                "**Players in Cache**: {playerCache}\n"
                 "**Online Players**: {onlinecount}"
             ).format(
                 ts=discord.utils.format_dt(self.bot.uptime),
                 stkseen_count=(
                     await self.bot.pool.fetchrow("SELECT COUNT(*) FROM lina_discord_stk_seen")
+                )["count"],
+                playerCache=(
+                    await self.bot.pool.fetchrow("SELECT COUNT(*) FROM lina_discord_stkusers")
                 )["count"],
                 onlinecount=len(self.bot.playertrack.onlinePlayers)
             ),

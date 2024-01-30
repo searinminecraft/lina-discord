@@ -18,13 +18,13 @@ log = logging.getLogger("lina.cogs.online")
 
 class FriendsListPaginator(ButtonPaginator):
 
-    def __init__(self, userid, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.userid = userid
+        self.user = user
 
     def format_page(self, page: Any):
         embed = discord.Embed(
-            title=f"Friends list of user {self.userid}",
+            title = f"{self.user}'s Friends",
             description="\n".join(
                 [f"* {x}" for x in page]
                 ),
@@ -39,6 +39,84 @@ class Online(commands.Cog):
     def __init__(self, bot: Lina):
         self.bot: Lina = bot
         self.addons_dict = {}
+        self.cachedSTKUsers = {}
+
+    async def addUsersToCache(self, users: list):
+
+        if len(users) == 1:
+            return await self.addUserToCache(users[0][0], users[0][1])
+
+        async with self.bot.pool.acquire() as conn:
+
+            pre = await conn.prepare("INSERT INTO lina_discord_stkusers (id, username) VALUES ($1, $2) ON CONFLICT DO NOTHING")
+
+            for user in users:
+                if user[0] not in self.cachedSTKUsers:
+                    log.debug("Adding %s (%d) to cache...",
+                              user[1], user[0])
+                    self.cachedSTKUsers[user[0]] = user[1]
+
+            await pre.executemany(users)
+
+    def idToUsername(self, userid: int):
+        """
+        Converts a given ID to a usernaFalse
+        Returns the ID if it's not found in the cache.
+        """
+
+        try:
+            return self.cachedSTKUsers[userid]
+        except IndexError:
+            return userid
+
+    async def usernameToId(self, username: str):
+        """
+        Converts a username to an ID.
+
+        Raises IndexError if player isn't found in the database.
+        """
+
+        sql_esc = str.maketrans({
+            "%": "\\%",
+            "_": "\\_",
+            "\\": "\\\\"
+        })
+
+        data = await self.bot.pool.fetchrow(
+                "SELECT * FROM lina_discord_stkusers "
+                "WHERE username ILIKE $1 "
+                "GROUP BY id FETCH FIRST 1 ROW ONLY",
+                username.translate(sql_esc) + '%')
+        
+        if not data:
+            raise IndexError(f"Could not find user {username} in database.")
+
+        return (data["id"], data["username"])
+
+    async def addUserToCache(self, userid: int, username: str):
+        log.debug("Adding %s (%d) to cache...",
+                  username, userid)
+
+        if userid not in self.cachedSTKUsers:
+            self.cachedSTKUsers[userid] = username
+        await self.bot.pool.execute(
+                "INSERT INTO lina_discord_stkusers (id, username) VALUES ($1, $2) "
+                "ON CONFLICT DO NOTHING",
+                userid, username)
+
+    async def populateCache(self):
+        log.info("Populating player cache...")
+
+        data = await self.bot.pool.fetch("SELECT * FROM lina_discord_stkusers")
+
+        for _ in data:
+            log.debug("Adding %s (%d) to cache...",
+                      _["username"], _["id"])
+
+            self.cachedSTKUsers[_["id"]] = _["username"]
+
+        log.info("Finished populating player cache.")
+
 
     @tasks.loop(hours=2)
     async def syncAddons(self):
@@ -162,7 +240,8 @@ class Online(commands.Cog):
             else:
                 return f'Unknown track (ID: `{_id}`)'
 
-    def cog_load(self):
+    async def cog_load(self):
+        self.bot.loop.create_task(self.populateCache())
         self.syncAddons.start()
 
     def cog_unload(self):
@@ -249,6 +328,7 @@ class Online(commands.Cog):
                 color=self.bot.accent_color
             ))
         else:
+            await self.addUsersToCache([ (int(x.attrib['id']), x.attrib['user_name']) for x in data[0] ])
             await interaction.response.send_message(embed=discord.Embed(
                 title=f"Search results for \"{query}\"",
                 description="\n".join([
@@ -257,14 +337,38 @@ class Online(commands.Cog):
                 color=self.bot.accent_color
             ))
 
-    @commands.hybrid_command(name="friendslist", description="Get a user's friends list.")
-    @app_commands.describe(userid="The user ID of target user. To know their user ID, you can search them using /usersearch.")
-    async def friendslist(self, ctx: commands.Context, userid: int):
-        data = await self.bot.stkPostReq(
-            "/api/v2/user/get-friends-list",
-            f"userid={self.bot.stk_userid}&"
-            f"token={self.bot.stk_token}&"
-            f"visitingid={userid}"
+    @app_commands.command(name="friendslist", description="Get a user's friends list.")
+    @app_commands.describe(user="The user ID or name of target user.")
+    async def friendslist(self, interaction: discord.Interaction, user: str):
+
+        try:
+            user = int(user)
+        except ValueError:
+            pass
+
+        if isinstance(user, int):
+            username = self.idToUsername(user)
+            data = await self.bot.stkPostReq(
+                "/api/v2/user/get-friends-list",
+                f"userid={self.bot.stk_userid}&"
+                f"token={self.bot.stk_token}&"
+                f"visitingid={user}"
+            )
+        else:
+            try:
+                userid, username = await self.usernameToId(user)
+            except IndexError:
+                return await interaction.response.send_message(embed=discord.Embed(
+                    title="Error",
+                    description=f"I couldn't find user {user} in the database. If possible, try specifying their User ID instead.",
+                    color=self.bot.accent_color
+                ))
+
+            data = await self.bot.stkPostReq(
+                "/api/v2/user/get-friends-list",
+                f"userid={self.bot.stk_userid}&"
+                f"token={self.bot.stk_token}&"
+                f"visitingid={userid}"
             )
 
         res = []
@@ -275,9 +379,75 @@ class Online(commands.Cog):
                 _id=data[0][x][0].attrib["id"])
             )
 
-        page = FriendsListPaginator(userid, res, author_id=ctx.author.id, per_page=25)
-        await page.start(ctx)
+        await self.addUsersToCache([(
+            int(data[0][x][0].attrib["id"]),
+            data[0][x][0].attrib["user_name"])
+            for x in range(len(data[0]))])
 
+        if len(res) == 0:
+            return await interaction.response.send_message(embed=discord.Embed(
+                title="Error",
+                description=f"User {username} has no friends :(",
+                color=self.bot.accent_color
+            ))
+
+        page = FriendsListPaginator(username, res, author_id=interaction.user.id, per_page=25)
+        await page.start(interaction)
+    
+    @app_commands.command(name="rank", description="Get a user's ranking")
+    @app_commands.describe(user="The user's ID or name")
+    async def stk_rank(self, interaction: discord.Interaction, user: str):
+
+        try:
+            user = int(user)
+        except ValueError:
+            pass
+
+        if isinstance(user, int):
+            username = self.idToUsername(user)
+            data = self.bot.stkPostReq(
+                    "/api/v2/user/get-ranking",
+                    f"userid={self.bot.stk_userid}&"
+                    f"token={self.bot.stk_token}&"
+                    f"id={user}"
+            )
+        else:
+            try:
+                userid, username = await self.usernameToId(user)
+            except IndexError:
+                return await interaction.response.send_message(embed=discord.Embed(
+                    title="Error",
+                    description=f"I couldn't find user {user} in the database. If possible, try specifying their User ID instead.",
+                    color=self.bot.accent_color
+                ))
+
+            data = await self.bot.stkPostReq(
+                "/api/v2/user/get-ranking",
+                f"userid={self.bot.stk_userid}&"
+                f"token={self.bot.stk_token}&"
+                f"id={userid}"
+            )
+
+
+        if int(data.attrib["rank"]) <= 0:
+            return await interaction.response.send_message(embed=discord.Embed(
+                description=f"{username} has no ranking yet.",
+                color=self.bot.accent_color
+            ))
+        else:
+            return await interaction.response.send_message(embed=discord.Embed(
+                title=f"{username}'s Ranking Info",
+                description=(
+                    f"**Rank**: {data.attrib['rank']}\n"
+                    f"**Score**: {round(float(data.attrib['scores']), ndigits=2)}\n"
+                    f"**Highest Score**: {round(float(data.attrib['max-scores']), ndigits=2)}\n"
+                    f"**Raw Score**: {round(float(data.attrib['raw-scores']), ndigits=2)}\n"
+                    f"**Number of Races**: {data.attrib['num-races-done']}\n"
+                    f"**Deviation**: {round(float(data.attrib['rating-deviation']), ndigits=2)}\n"
+                    f"**Disconnects**: (placeholder)"
+                    ),
+                color=self.bot.accent_color
+                ))
 
 async def setup(bot: Lina):
     await bot.add_cog(Online(bot))

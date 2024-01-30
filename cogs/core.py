@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import discord
 from discord.ext import commands
+import logging
 from typing import TYPE_CHECKING, Optional
+
+log = logging.getLogger("lina.cogs.core")
 
 if TYPE_CHECKING:
     from bot import Lina
@@ -22,6 +25,7 @@ class Core(commands.Cog):
             await ctx.channel.typing()
             await self.bot.load_extension(mod)
         except commands.ExtensionError as e:
+            log.exception("%s: Unable to load:", mod, exc_info=e)
             await ctx.reply(f"{e.__class__.__name__}: {e}")
         else:
             await ctx.reply("Loaded.")
@@ -33,6 +37,7 @@ class Core(commands.Cog):
             await ctx.channel.typing()
             await self.bot.unload_extension(mod)
         except commands.ExtensionError as e:
+            log.exception("%s: Unable to unload:", mod, exc_info=e)
             await ctx.reply(f"{e.__class__.__name__}: {e}")
         else:
             await ctx.reply("Unloaded.")
@@ -43,6 +48,7 @@ class Core(commands.Cog):
             await ctx.channel.typing()
             await self.bot.reload_extension(mod)
         except commands.ExtensionError as e:
+            log.exception("%s: Unable to reload:", mod, exc_info=e)
             await ctx.reply(f"{e.__class__.__name__}: {e}")
         else:
             await ctx.reply("Reloaded.")

@@ -29,7 +29,14 @@ def setup_logging():
         logging.getLogger('discord.http').setLevel(logging.WARNING)
         logging.getLogger('discord.state').addFilter(RemoveNoise())
 
-        log.setLevel(logging.INFO)
+        if hasattr(constants, "DEBUG_LOGS"):
+            if constants.DEBUG_LOGS:
+                log.setLevel(logging.DEBUG)
+            else:
+                log.setLevel(logging.INFO)
+        else:
+            log.setLevel(logging.INFO)
+
         handler = RotatingFileHandler(filename='lina.log', encoding='utf-8', mode='w', maxBytes=max_bytes, backupCount=5)
         dt_fmt = '%Y-%m-%d %H:%M:%S'
         fmt = logging.Formatter('[{asctime}] [{levelname:<7}] {name}: {message}', dt_fmt, style='{')
@@ -86,6 +93,13 @@ async def initDatabase(pool: asyncpg.Pool) -> None:
                 status int NOT NULL,
                 size int NOT NULL,
                 rating float NOT NULL
+            )
+            """)
+
+            await con.execute("""
+            CREATE TABLE IF NOT EXISTS lina_discord_stkusers (
+                id int NOT NULL PRIMARY KEY,
+                username varchar(30) NOT NULL
             )
             """)
 

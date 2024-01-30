@@ -10,15 +10,17 @@ This bot is currently used for the SuperTuxKart Discord, but you can self host i
 - [x] STK Seen
 - [x] Top 10 ranked players
 - [x] Player searching
-- [ ] Friends list (partial)
+- [x] Friends list
 - [x] Server list
 - [ ] PokeMap
 - [ ] Addon querying
-- [ ] Ranking info of a player
+- [x] Ranking info of a player
+
 ## Internal
 - [x] Authentication
 - [x] Polling
 - [x] Session revalidation
+- [x] Player caching (saves username and ID for future use)
 
 # How to set up
 

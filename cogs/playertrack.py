@@ -252,6 +252,7 @@ class PlayerTrack(commands.Cog):
 
             for i in range(len(serverPlayers)):
                 username = serverPlayers[i].attrib['username']
+                userid = int(serverPlayers[i].attrib['user-id'])
                 userCountryCode = serverPlayers[i].attrib['country-code'].lower() if 'country-code' in serverPlayers[i].attrib else ''
 
                 if username in playersJoined:
@@ -265,7 +266,9 @@ class PlayerTrack(commands.Cog):
                             userCountryCode,
                             serverName,
                             serverCountry
-                        ))
+                        )) 
+
+                    await self.bot.online.addUserToCache(userid, username)
 
                     async with self.bot.pool.acquire() as con:
                         for e in await con.fetch("SELECT * FROM lina_discord_ptrack;"):

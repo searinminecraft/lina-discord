@@ -128,6 +128,7 @@ class Lina(commands.Bot):
             log.exception("Poll request failed due to exception:")
 
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        log.exception("%s: Command error occurred", ctx.command.name, exc_info=error)
         if isinstance(error, commands.NoPrivateMessage):
             return await ctx.author.send("You can't use this command in private messages.")
 
@@ -142,13 +143,15 @@ class Lina(commands.Bot):
                     color=self.accent_color
                 ))
 
-            return await ctx.send(embed=discord.Embed(
-                title="Sorry, this shouldn't have happened. Guru Meditation.",
-                description=f"```\n{str(original)}\n```",
-                color=self.accent_color
-            ))
+        return await ctx.send(embed=discord.Embed(
+            title="Sorry, this shouldn't have happened. Guru Meditation.",
+            description=f"```\n{error.original.__class__.__name__}: {str(error.original)}\n```",
+            color=self.accent_color
+        ))
 
     async def on_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        log.exception("%s: App command error occurred.", interaction.command.name, exc_info=error)
+        
         if isinstance(error, app_commands.CommandInvokeError):
             error: app_commands.CommandInvokeError
             original = error.original
@@ -162,7 +165,7 @@ class Lina(commands.Bot):
 
             return await interaction.response.send_message(embed=discord.Embed(
                 title="Sorry, this shouldn't have happened. Guru Meditation.",
-                description=f"```\n{str(original)}\n```",
+                description=f"```\n{error.original.__class__.__name__}: {str(error.original)}\n```",
                 color=self.accent_color
             ), ephemeral=True)
 
