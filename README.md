@@ -1,4 +1,7 @@
 # linaSTK Discord Edition
+
+> **Note:** This repository is archived and is outdated. All development has been moved to [Codeberg](https://codeberg.org/kita/lina-discord).
+
 This is lina rewritten to work on Discord. It has the same functions as the Revolt version but it's still work in progress and is incomplete.
 
 This bot is currently used for the SuperTuxKart Discord, but you can self host it yourself.
